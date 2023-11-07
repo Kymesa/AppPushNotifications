@@ -5,60 +5,42 @@
  *
  * @format
  */
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {SafeAreaView, ScrollView, Text, View} from 'react-native';
-import {
-  notificationsListener,
-  requestUserPermission,
-} from './src/utils/pushNotifications';
-import {PERMISSIONS, RESULTS, check, request} from 'react-native-permissions';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import messaging from '@react-native-firebase/messaging';
+import usePushNotification from './src/hooks/usePushNotification';
 
 const App = (): JSX.Element => {
-  const [tokenFmc, setTokenFmc] = useState<string | null>('');
-  const requestNotificationPermission = async () => {
-    const result = await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS);
-    return result;
-  };
+  const {
+    requestUserPermission,
+    getFCMToken,
+    listenToBackgroundNotifications,
+    listenToForegroundNotifications,
+    onNotificationOpenedAppFromBackground,
+    onNotificationOpenedAppFromQuit,
+  } = usePushNotification();
 
-  const checkNotificationPermission = async () => {
-    const result = await check(PERMISSIONS.ANDROID.POST_NOTIFICATIONS);
-    return result;
-  };
-
-  const getFmcToken = async () => {
-    let fcmToken = await AsyncStorage.getItem('fmcToken');
-    setTokenFmc(fcmToken);
-    console.log('FMC TOKEN -> ', fcmToken);
-    if (!fcmToken) {
+  useEffect(() => {
+    const listenToNotifications = () => {
       try {
-        const token = await messaging().getToken();
-        if (token) {
-          console.log(token, 'NEW TOKEN');
-          setTokenFmc(token);
-          await AsyncStorage.setItem('fmcToken', token);
-        }
+        getFCMToken();
+        requestUserPermission();
+        onNotificationOpenedAppFromQuit();
+        listenToBackgroundNotifications();
+        listenToForegroundNotifications();
+        onNotificationOpenedAppFromBackground();
       } catch (error) {
         console.log(error);
       }
-    }
-  };
-
-  useEffect(() => {
-    const requestPermission = async () => {
-      const checkPermission = await checkNotificationPermission();
-      if (checkPermission !== RESULTS.GRANTED) {
-        const requests = await requestNotificationPermission();
-        if (requests !== RESULTS.GRANTED) {
-          getFmcToken();
-          requestUserPermission();
-          notificationsListener();
-        }
-      }
     };
-    requestPermission();
-  }, []);
+    listenToNotifications();
+  }, [
+    getFCMToken,
+    listenToBackgroundNotifications,
+    listenToForegroundNotifications,
+    onNotificationOpenedAppFromBackground,
+    onNotificationOpenedAppFromQuit,
+    requestUserPermission,
+  ]);
   return (
     <SafeAreaView>
       <ScrollView>
@@ -72,7 +54,6 @@ const App = (): JSX.Element => {
             }}>
             SOCIAL APP NOTIFICATIONS RN-CLI
           </Text>
-          <Text>TOKEN_FMC - {tokenFmc}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
