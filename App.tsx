@@ -5,14 +5,15 @@
  *
  * @format
  */
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {SafeAreaView, ScrollView, Text, View} from 'react-native';
 import usePushNotification from './src/hooks/usePushNotification';
+import messaging from '@react-native-firebase/messaging';
 
 const App = (): JSX.Element => {
+  const [token, setToken] = useState<string>('');
   const {
     requestUserPermission,
-    getFCMToken,
     listenToBackgroundNotifications,
     listenToForegroundNotifications,
     onNotificationOpenedAppFromBackground,
@@ -22,6 +23,15 @@ const App = (): JSX.Element => {
   useEffect(() => {
     const listenToNotifications = () => {
       try {
+        const getFCMToken = async () => {
+          const fcmToken = await messaging().getToken();
+          setToken(fcmToken);
+          if (fcmToken) {
+            console.log('Your Firebase Token is:', fcmToken);
+          } else {
+            console.log('Failed', 'No token received');
+          }
+        };
         getFCMToken();
         requestUserPermission();
         onNotificationOpenedAppFromQuit();
@@ -34,7 +44,6 @@ const App = (): JSX.Element => {
     };
     listenToNotifications();
   }, [
-    getFCMToken,
     listenToBackgroundNotifications,
     listenToForegroundNotifications,
     onNotificationOpenedAppFromBackground,
@@ -54,6 +63,7 @@ const App = (): JSX.Element => {
             }}>
             SOCIAL APP NOTIFICATIONS RN-CLI
           </Text>
+          <Text> TOKEN - {token} </Text>
         </View>
       </ScrollView>
     </SafeAreaView>

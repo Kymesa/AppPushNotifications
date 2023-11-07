@@ -21,15 +21,6 @@ const usePushNotification = () => {
     }
   };
 
-  const getFCMToken = async () => {
-    const fcmToken = await messaging().getToken();
-    if (fcmToken) {
-      console.log('Your Firebase Token is:', fcmToken);
-    } else {
-      console.log('Failed', 'No token received');
-    }
-  };
-
   const listenToForegroundNotifications = async () => {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       console.log(
@@ -77,7 +68,6 @@ const usePushNotification = () => {
 
   return {
     requestUserPermission,
-    getFCMToken,
     listenToForegroundNotifications,
     listenToBackgroundNotifications,
     onNotificationOpenedAppFromBackground,
