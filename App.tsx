@@ -51,7 +51,7 @@ const App = (): JSX.Element => {
     requestUserPermission,
   ]);
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{backgroundColor: 'white', flex: 1}}>
       <ScrollView>
         <View>
           <Text
@@ -63,7 +63,7 @@ const App = (): JSX.Element => {
             }}>
             SOCIAL APP NOTIFICATIONS RN-CLI
           </Text>
-          <Text> TOKEN - {token} </Text>
+          <Text style={{color: 'black'}}> TOKEN - {token} </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
